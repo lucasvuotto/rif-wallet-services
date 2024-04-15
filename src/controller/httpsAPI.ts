@@ -54,7 +54,7 @@ export class HttpsAPI {
         .transform(address => utils.isAddress(address.toLowerCase()) ? address : '')
     }).required()
 
-    const whilelist = ['https://dapp.testnet.dao.rif.technology/', 'https://dapp.mainnet.dao.rif.technology/']
+    const whilelist = ['https://dapp.testnet.dao.rif.technology', 'https://dapp.mainnet.dao.rif.technology']
     this.app.use(cors({
       origin: (origin, callback) => {
         if (!origin || whilelist.indexOf(origin) !== -1) {

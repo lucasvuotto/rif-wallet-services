@@ -1,3 +1,4 @@
+import cors from 'cors'
 import { Application, NextFunction, Request, Response, Express } from 'express'
 import { PricesQueryParams } from '../api/types'
 import { registeredDapps } from '../registered_dapps'
@@ -52,6 +53,17 @@ export class HttpsAPI {
         .trim()
         .transform(address => utils.isAddress(address.toLowerCase()) ? address : '')
     }).required()
+
+    const whilelist = ['https://dapp.testnet.dao.rif.technology/', 'https://dapp.mainnet.dao.rif.technology/']
+    this.app.use(cors({
+      origin: (origin, callback) => {
+        if (!origin || whilelist.indexOf(origin) !== -1) {
+          callback(null, true)
+        } else {
+          callback(new Error('Not allowed by cors'))
+        }
+      }
+    }))
 
     this.app.get('/tokens', ({ query: { chainId = '31' } }: Request, res: Response, next: NextFunction) => {
       try {

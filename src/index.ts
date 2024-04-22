@@ -22,7 +22,7 @@ async function main () {
       {
         ID: '31',
         API_URL: (process.env.API_URL as string) ||
-        'https://backend.explorer.testnet.rsk.co/api',
+        'https://be.explorer.testnet.rootstock.io/api',
         CHAIN_ID: parseInt(process.env.CHAIN_ID as string) || 31,
         BLOCKBOOK_URL: process.env.BLOCKBOOK_URL,
         NODE_URL: process.env.NODE_URL,
@@ -31,7 +31,7 @@ async function main () {
       {
         ID: '30',
         API_URL: (process.env.API_MAINNET_URL as string) ||
-        'https://backend.explorer.rsk.co/api',
+        'https://be.explorer.rootstock.io/api',
         CHAIN_ID: parseInt(process.env.CHAIN_MAINNET_ID as string) || 30,
         BLOCKBOOK_URL: process.env.BLOCKBOOK_MAINNET_URL,
         NODE_URL: process.env.NODE_MAINNET_URL,

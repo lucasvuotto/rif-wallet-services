@@ -86,6 +86,24 @@ module.exports = {
             schema: { type: 'string' }
           },
           {
+            name: 'startTimestamp',
+            in: 'query',
+            description: 'starting block unix timestamp.',
+            required: false,
+            schema: {
+              type: 'string'
+            }
+          },
+          {
+            name: 'endTimestamp',
+            in: 'query',
+            description: 'ending block unix timestamp.',
+            required: false,
+            schema: {
+              type: 'string'
+            }
+          },
+          {
             name: 'limit',
             in: 'query',
             description: 'Limit for the number of records to return',
@@ -293,6 +311,24 @@ module.exports = {
             schema: {
               type: 'string',
               default: '0'
+            }
+          },
+          {
+            name: 'startTimestamp',
+            in: 'query',
+            description: 'starting block unix timestamp.',
+            required: false,
+            schema: {
+              type: 'string'
+            }
+          },
+          {
+            name: 'endTimestamp',
+            in: 'query',
+            description: 'ending block unix timestamp.',
+            required: false,
+            schema: {
+              type: 'string'
             }
           },
           {

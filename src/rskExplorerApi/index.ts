@@ -22,6 +22,10 @@ export class RSKExplorerAPI extends DataSource {
     this.chainId = chainId
   }
 
+  getBlockNumberByTimestamp () {
+    return '0'
+  }
+
   async getEventsByAddress (address:string, limit?: string) {
     const params = {
       module: 'events',

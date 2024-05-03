@@ -13,7 +13,7 @@ import { BitcoinDatasource, RSKDatasource, RSKNodeProvider } from './repository/
 import BitcoinCore from './service/bitcoin/BitcoinCore'
 import { ethers } from 'ethers'
 import { AddressService } from './service/address/AddressService'
-import { RSKExplorerAPI } from './rskExplorerApi'
+import { BlockscoutAPI } from './blockscoutApi'
 
 async function main () {
   const environment = {
@@ -51,8 +51,8 @@ async function main () {
   const bitcoinMapping: BitcoinDatasource = {}
   const nodeProvider: RSKNodeProvider = {}
   environment.NETWORKS.forEach(network => {
-    dataSourceMapping[network.ID] = new RSKExplorerAPI(network.API_URL, network.CHAIN_ID, axios, network.ID)
-    // dataSourceMapping[network.ID] = new BlockscoutAPI(network.API_URL, network.CHAIN_ID, axios, network.ID)
+    // dataSourceMapping[network.ID] = new RSKExplorerAPI(network.API_URL, network.CHAIN_ID, axios, network.ID)
+    dataSourceMapping[network.ID] = new BlockscoutAPI(network.API_URL, network.CHAIN_ID, axios, network.ID)
     bitcoinMapping[network.ID] = new BitcoinCore({
       BLOCKBOOK_URL: network.BLOCKBOOK_URL,
       CYPHER_ESTIMATE_FEE_URL: network.CYPHER_ESTIMATE_FEE_URL

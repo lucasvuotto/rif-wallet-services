@@ -17,6 +17,8 @@ interface GetTransactionsByAddressFunction {
   prev?: string
   next?: string
   blockNumber: string
+  startTimestamp?: number,
+  endTimestamp?: number
 }
 
 interface GetPricesFunction {
@@ -48,7 +50,7 @@ export class AddressService {
   }
 
   async getTransactionsByAddress (
-    { chainId, address, limit, next, prev, blockNumber }: GetTransactionsByAddressFunction
+    { chainId, address, limit, next, prev, blockNumber, startTimestamp, endTimestamp }: GetTransactionsByAddressFunction
   ) {
     const dataSource = this.dataSourceMapping[chainId]
     /* A transaction has the following structure { to: string, from: string }
@@ -56,8 +58,11 @@ export class AddressService {
       * (such as RBTC).
     */
     const transactions: {data: IApiTransactions[], prev: string, next: string} =
-      await dataSource.getTransactionsByAddress(address, limit, prev, next, blockNumber)
-
+      await dataSource.getTransactionsByAddress(address, limit, prev, next, blockNumber, startTimestamp, endTimestamp)
+    let startBlock = 0
+    let endBlock = await this.providerMapping[chainId].getBlockNumber()
+    if (startTimestamp) { startBlock = await dataSource.getBlockNumberByTimestamp(startTimestamp, 'after') }
+    if (endTimestamp) { endBlock = await dataSource.getBlockNumberByTimestamp(endTimestamp, 'before') }
     /* We query events to find transactions when we send or receive a token(ERC20)
       * such as RIF,RDOC
       * Additionally, we query internal transactions because we could send or receive a cryptocurrency
@@ -65,8 +70,8 @@ export class AddressService {
       * Finally, we filter by blocknumber and duplicates
     */
     const hashes: string[] = await Promise.all([
-      dataSource.getEventsByAddress(address, limit as string),
-      dataSource.getInternalTransactionByAddress(address, limit as string)
+      dataSource.getEventsByAddress(address, limit as string, startBlock, endBlock),
+      dataSource.getInternalTransactionByAddress(address, limit as string, startBlock, endBlock)
     ])
       .then((promises) => {
         return promises.flat()
@@ -112,12 +117,14 @@ export class AddressService {
     blockNumber,
     limit,
     prev,
-    next
+    next,
+    startTimestamp,
+    endTimestamp
   }: GetBalancesTransactionsPricesByAddress) {
     const [prices, tokens, transactions] = await Promise.all([
       this.getLatestPrices(),
       this.getTokensByAddress({ chainId, address }),
-      this.getTransactionsByAddress({ chainId, address, blockNumber, limit, prev, next })
+      this.getTransactionsByAddress({ chainId, address, blockNumber, limit, prev, next, startTimestamp, endTimestamp })
     ])
     return {
       prices,

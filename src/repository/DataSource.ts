@@ -14,16 +14,20 @@ export abstract class DataSource {
   }
 
   abstract getTokens();
+  abstract getBlockNumberByTimestamp(timestamp: number, timeDirection: string);
   abstract getTokensByAddress(address: string);
   abstract getRbtcBalanceByAddress(address: string);
-  abstract getEventsByAddress(address: string, limit?: string);
+  abstract getEventsByAddress(address: string, limit?: string, startBlock?: number, endBlock?: number);
   abstract getTransaction(hash: string);
-  abstract getInternalTransactionByAddress(address: string, limit?: string);
+  abstract getInternalTransactionByAddress(address: string, limit?: string, startBlock?: number, endBlock?: number);
   abstract getTransactionsByAddress(address:string,
     limit?: string,
     prev?: string,
     next?: string,
-    blockNumber?: string);
+    blockNumber?: string,
+    startTimestamp?: number,
+    endTimestamp?: number,
+  );
 }
 
 export type RSKDatasource = {

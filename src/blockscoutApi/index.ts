@@ -1,9 +1,8 @@
 import _axios from 'axios'
 import { DataSource } from '../repository/DataSource'
 import {
-  BalanceServerResponse, InternalTransactionResponse, ServerResponse, TokenBalanceServerResponse,
-  TokenServerResponse, TokenTransferApi, TransactionServerResponse,
-  TransactionsServerResponse
+  BalanceServerResponse, BlockResponse, InternalTransaction, ServerResponse, TokenBalanceServerResponse,
+  TokenServerResponse, TokenTransferApi, TransactionResponse
 } from './types'
 import {
   fromApiToInternalTransaction, fromApiToRtbcBalance, fromApiToTEvents,
@@ -20,6 +19,18 @@ export class BlockscoutAPI extends DataSource {
   constructor (apiURL: string, chainId: number, axios: typeof _axios, id: string) {
     super(apiURL, id, axios)
     this.chainId = chainId
+  }
+
+  getBlockNumberByTimestamp (timestamp: number, timeDirection: string) {
+    const params = {
+      module: 'block',
+      action: 'getblocknobytime',
+      timestamp,
+      closest: timeDirection
+    }
+    return this.axios?.get<ServerResponse<BlockResponse>>(this.url, { params })
+      .then(response => response.data.result.blockNumber)
+      .catch(() => '0')
   }
 
   getTokens () {
@@ -47,13 +58,15 @@ export class BlockscoutAPI extends DataSource {
       .catch(this.errorHandling)
   }
 
-  async getEventsByAddress (address: string) {
+  async getEventsByAddress (address: string, limit?: string, startBlock?: number, endBlock?: number) {
     const params = {
       module: 'account',
       action: 'tokentx',
-      address: address.toLowerCase()
+      address: address.toLowerCase(),
+      ...(startBlock && { startblock: startBlock }),
+      ...(endBlock && { endblock: endBlock })
     }
-    return this.axios?.get<ServerResponse<TokenTransferApi>>(`${this.url}`, { params })
+    return this.axios?.get<ServerResponse<TokenTransferApi[]>>(`${this.url}`, { params })
       .then(response =>
         response.data.result
           .map(tokenTranfer => {
@@ -63,25 +76,48 @@ export class BlockscoutAPI extends DataSource {
   }
 
   getTransaction (hash: string) {
-    return this.axios?.get<TransactionServerResponse>(`${this.url}/v2/transactions/${hash}`)
+    const params = {
+      module: 'transaction',
+      action: 'gettxinfo',
+      txhash: hash
+    }
+    return this.axios?.get<ServerResponse<TransactionResponse>>(`${this.url}`, { params })
       .then(response =>
-        fromApiToTransaction(response.data))
+        fromApiToTransaction(response.data.result))
       .catch(this.errorHandling)
   }
 
-  getInternalTransactionByAddress (address: string) {
-    return this.axios?.get<InternalTransactionResponse>(
-      `${this.url}/v2/addresses/${address.toLowerCase()}/internal-transactions`
-    )
-      .then(response => response.data.items.map(fromApiToInternalTransaction))
+  getInternalTransactionByAddress (address: string, limit?: string, startBlock?: number, endBlock?: number) {
+    const params = {
+      module: 'account',
+      action: 'txlistinternal',
+      address,
+      ...(startBlock && { startblock: startBlock }),
+      ...(endBlock && { endblock: endBlock })
+    }
+    return this.axios?.get<ServerResponse<InternalTransaction[]>>(this.url, { params })
+      .then(response => response.data.result.map(fromApiToInternalTransaction))
       .catch(this.errorHandling)
   }
 
-  getTransactionsByAddress (address: string) {
-    return this.axios?.get<TransactionsServerResponse>(
-      `${this.url}/v2/addresses/${address.toLowerCase()}/transactions`
+  getTransactionsByAddress (address: string, limit?: string,
+    prev?: string,
+    next?: string,
+    blockNumber?: string,
+    startTimestamp?: number,
+    endTimestamp?: number) {
+    const params = {
+      module: 'account',
+      action: 'txlist',
+      startblock: blockNumber,
+      address: address.toLowerCase(),
+      ...(startTimestamp && { start_timestamp: startTimestamp }),
+      ...(endTimestamp && { end_timestamp: endTimestamp })
+    }
+    return this.axios?.get<ServerResponse<TransactionResponse[]>>(
+      `${this.url}`, { params }
     )
-      .then(response => ({ data: response.data.items.map(fromApiToTransaction) }))
+      .then(response => ({ data: response.data.result.map(fromApiToTransaction) }))
       .catch(this.errorHandling)
   }
 }

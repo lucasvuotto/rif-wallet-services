@@ -110,60 +110,46 @@ export interface DecodedInput {
 }
 
 export interface InternalTransaction {
-  block: number
-  created_contract: any
-  error: any
-  from: Account
-  gas_limit: string
-  index: number
-  success: boolean
-  timestamp: string
-  to: Account
-  transaction_hash: string
+  blockNumber: string
+  callType: string
+  contractAddress: string
+  errCode: string
+  from: string
+  gas: string
+  gasUsed: string
+  index: string
+  input: string
+  isError: string
+  timeStamp: string
+  to: string
+  transactionHash: string
   type: string
   value: string
 }
 
-export interface TransactionServerResponse {
-  timestamp: string
-  fee: Fee
-  gas_limit: string
-  block: number
-  status: string
-  method: string
-  confirmations: number
-  type: number
-  exchange_rate: any
-  to: Account
-  tx_burnt_fee: any
-  max_fee_per_gas: any
-  result: string
+export interface TransactionResponse {
+  blockHash: string
+  blockNumber: string
+  confirmations: string
+  contractAddress: string
+  cumulativeGasUsed: string
+  from: string
+  gas: string
+  gasPrice: string
+  gasUsed: string
   hash: string
-  gas_price: string
-  priority_fee: any
-  base_fee_per_gas: any
-  from: Account
-  token_transfers: TokenTransfer[]
-  tx_types: string[]
-  gas_used: string
-  created_contract: any
-  position: number
-  nonce: number
-  has_error_in_internal_txs: boolean
-  actions: any[]
-  decoded_input: DecodedInput
-  token_transfers_overflow: boolean
-  raw_input: string
+  input: string
+  isError: string
+  nonce: string
+  timeStamp: string
+  to: string
+  transactionIndex: string
+  txreceipt_status: string
   value: string
-  max_priority_fee_per_gas: any
-  revert_reason: any
-  confirmation_duration: number[]
-  tx_tag: any
 }
 
-export interface TransactionsServerResponse {
-  items: TransactionServerResponse[]
-  next_page_params: NextPageParams
+export interface BlockResponse {
+  blockNumber: string
 }
 
 export interface BalanceServerResponse {
@@ -229,5 +215,5 @@ export interface TokenTransferApi {
 export interface ServerResponse<T> {
   message: string
   status: string
-  result: T[]
+  result: T
 }

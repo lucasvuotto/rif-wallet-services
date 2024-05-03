@@ -1,6 +1,6 @@
 import {
   IApiToken, ITokenWithBalance, InternalTransaction,
-  Token, TokenTransferApi, TransactionServerResponse
+  Token, TokenTransferApi, TransactionResponse
 } from './types'
 import tokens from '@rsksmart/rsk-contract-metadata'
 import { toChecksumAddress } from '@rsksmart/rsk-utils'
@@ -126,68 +126,70 @@ export const fromApiToTEvents = (tokenTransfer:TokenTransferApi): IEvent =>
     txStatus: '0x1'
   })
 
-export const fromApiToTransaction = (transaction: TransactionServerResponse): ITransaction =>
-  ({
+export const fromApiToTransaction = (transaction: TransactionResponse): ITransaction => {
+  const txType = transaction.input === '0x' ? 'normal' : 'contract call'
+  return ({
     _id: '',
     hash: transaction.hash,
-    nonce: transaction.nonce,
-    blockHash: '',
-    blockNumber: transaction.block,
+    nonce: Number(transaction.nonce),
+    blockHash: transaction.blockHash,
+    blockNumber: Number(transaction.blockNumber),
     transactionIndex: 0,
-    from: transaction.from.hash,
-    to: transaction.to.hash,
-    gas: Number(transaction.gas_used),
-    gasPrice: transaction.gas_price,
+    from: transaction.from,
+    to: transaction.to,
+    gas: Number(transaction.gas),
+    gasPrice: transaction.gasPrice,
     value: transaction.value,
-    input: transaction.raw_input,
+    input: transaction.input,
     v: '',
     r: '',
     s: '',
-    type: String(transaction.type),
-    timestamp: Date.parse(transaction.timestamp) / 1000,
+    type: String(),
+    timestamp: Number(transaction.timeStamp),
     receipt: {
       transactionHash: transaction.hash,
       transactionIndex: 0,
       blockHash: '',
-      blockNumber: transaction.block,
-      cumulativeGasUsed: Number(transaction.gas_limit),
-      gasUsed: Number(transaction.gas_used),
+      blockNumber: Number(transaction.blockNumber),
+      cumulativeGasUsed: Number(transaction.gasUsed),
+      gasUsed: Number(transaction.gasUsed),
       contractAddress: null,
       logs: [],
-      from: transaction.from.hash,
-      to: transaction.to.hash,
-      status: transaction.status === 'ok' ? '0x1' : '0x0',
+      from: transaction.from,
+      to: transaction.to,
+      status: transaction.txreceipt_status === '1' ? '0x1' : '0x0',
       logsBloom: '',
-      type: String(transaction.type)
+      type: txType
     },
-    txType: transaction.tx_types[0],
+    txType,
     txId: ''
   })
+}
 
 export const fromApiToInternalTransaction = (internalTransaction: InternalTransaction): IInternalTransaction =>
   ({
     _id: '',
     action: {
       callType: internalTransaction.type,
-      from: internalTransaction.from.hash,
-      to: internalTransaction.to.hash,
+      from: internalTransaction.from,
+      to: internalTransaction.to,
       value: internalTransaction.value,
-      gas: internalTransaction.gas_limit,
+      gas: internalTransaction.gas,
       input: '0x'
     },
     blockHash: '',
-    blockNumber: internalTransaction.block,
-    transactionHash: internalTransaction.transaction_hash,
-    transactionPosition: internalTransaction.index,
+    blockNumber: Number(internalTransaction.blockNumber),
+    transactionHash: internalTransaction.transactionHash,
+    transactionPosition: Number(internalTransaction.index),
     type: internalTransaction.type,
     subtraces: 0,
     traceAddress: [],
     result: {
-      gasUsed: internalTransaction.gas_limit,
+      gasUsed: internalTransaction.gasUsed,
       output: '0x'
     },
-    _index: internalTransaction.index,
-    timestamp: Date.parse(internalTransaction.timestamp) / 1000,
+    _index: Number(internalTransaction.index),
+    timestamp: Date.parse(internalTransaction.timeStamp) / 1000,
     internalTxId: ''
   })
 

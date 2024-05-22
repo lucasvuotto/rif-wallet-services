@@ -89,7 +89,7 @@ export class AddressService {
   }
 
   async getPrices ({ addresses, convert }: GetPricesFunction) {
-    const addressesArr = addresses.split(',')
+    const addressesArr = addresses.toLowerCase().split(',')
     return this.lastPrice.getPrices(addressesArr, convert)
   }
 

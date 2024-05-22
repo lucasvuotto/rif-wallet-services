@@ -98,9 +98,13 @@ describe('coin market cap', () => {
       ]
       const res = await request(app)
         .get(`/price?convert=asd&addresses=${addresses.join(',')}`)
-        .expect(500)
+        .expect(400)
 
-      expect(res.text).toEqual('Convert not supported')
+      expect(res.body).toEqual({
+        errors: [
+          'The current currency is not supported'
+        ]
+      })
       expect(axiosMock.get).toHaveBeenCalledTimes(1)
     })
 
@@ -110,9 +114,13 @@ describe('coin market cap', () => {
 
       const res = await request(app)
         .get('/price?convert=USD&addresses=0x2acc95758f8b5f583470ba265eb685a8f45fc9d')
-        .expect(200)
+        .expect(400)
 
-      expect(res.text).toEqual('{}')
+      expect(res.body).toEqual({
+        errors: [
+          'An address is invalid'
+        ]
+      })
       expect(axiosMock.get).toHaveBeenCalledTimes(1)
     })
   })

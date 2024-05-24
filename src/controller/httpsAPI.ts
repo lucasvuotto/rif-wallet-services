@@ -10,6 +10,7 @@ import BitcoinRouter from '../service/bitcoin/BitcoinRouter'
 import { ValidationError, object, string } from 'yup'
 import { utils } from 'ethers'
 import { AddressService } from '../service/address/AddressService'
+import { supportedFiat } from '../coinmarketcap/support'
 
 interface HttpsAPIDependencies {
   app: Express,
@@ -49,12 +50,19 @@ export class HttpsAPI {
         .oneOf(Object.keys(this.dataSourceMapping), 'The current chainId is not supported')
     })
     const addressSchema = object({
-      address: string().required('we required a valid address')
+      address: string().required('An address is invalid')
         .trim()
         .transform(address => utils.isAddress(address.toLowerCase()) ? address : '')
     }).required()
+    const currencySchema = object({
+      convert: string().optional()
+        .trim()
+        .oneOf(supportedFiat, 'The current currency is not supported')
+    })
 
-    const whilelist = ['https://dapp.testnet.dao.rif.technology', 'https://dapp.mainnet.dao.rif.technology']
+    const whilelist = ['https://dapp.testnet.dao.rif.technology',
+      'https://dapp.mainnet.dao.rif.technology',
+      'https://rif-wallet-services.testnet.rifcomputing.net']
     this.app.use(cors({
       origin: (origin, callback) => {
         if (!origin || whilelist.indexOf(origin) !== -1) {
@@ -135,15 +143,18 @@ export class HttpsAPI {
 
     this.app.get(
       '/price',
-      async (req: Request<{}, {}, {}, PricesQueryParams>, res: Response, next: NextFunction) => {
+      async (req: Request<{}, {}, {}, PricesQueryParams>, res: Response) => {
         try {
+          const { convert = 'USD', addresses = '' } = req.query
+          currencySchema.validateSync({ convert })
+          addresses.split(',').forEach(address => addressSchema.validateSync({ address }))
           const prices = await this.addressService.getPrices({
-            addresses: req.query.addresses || '',
-            convert: req.query.convert || 'USD'
+            addresses,
+            convert
           })
           return this.responseJsonOk(res)(prices)
         } catch (error) {
-          next(error)
+          this.handleValidationError(error, res)
         }
       }
     )
@@ -162,10 +173,12 @@ export class HttpsAPI {
 
     this.app.get(
       '/address/:address',
-      async (req, res, next: NextFunction) => {
+      async (req, res) => {
         try {
           const { limit, prev, next, chainId = '31', blockNumber = '0' } = req.query
           const { address } = req.params
+          chainIdSchema.validateSync({ chainId })
+          addressSchema.validateSync({ address })
           const data = await this.addressService.getAddressDetails({
             chainId: chainId as string,
             address,
@@ -176,7 +189,7 @@ export class HttpsAPI {
           })
           return this.responseJsonOk(res)(data)
         } catch (error) {
-          next(error)
+          this.handleValidationError(error, res)
         }
       }
     )

@@ -131,6 +131,16 @@ module.exports = {
                 }
               }
             }
+          },
+          400: {
+            description: 'Validation Error',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ValidationError'
+                }
+              }
+            }
           }
         }
       }
@@ -184,6 +194,16 @@ module.exports = {
                 }
               }
             }
+          },
+          400: {
+            description: 'Validation Error',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ValidationError'
+                }
+              }
+            }
           }
         }
       }
@@ -234,6 +254,16 @@ module.exports = {
                   items: {
                     $ref: '#/components/schemas/Event'
                   }
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Validation Error',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ValidationError'
                 }
               }
             }
@@ -341,6 +371,16 @@ module.exports = {
                 }
               }
             }
+          },
+          400: {
+            description: 'Validation Error',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ValidationError'
+                }
+              }
+            }
           }
         }
       }
@@ -399,6 +439,16 @@ module.exports = {
                       lastUpdated: '2022-08-26T06:56:00.000Z'
                     }
                   }
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Validation Error',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ValidationError'
                 }
               }
             }
@@ -1279,6 +1329,18 @@ module.exports = {
           properties: {
             price: { type: 'number' },
             lastUpdated: { type: 'string', format: 'date-time' }
+          }
+        }
+      },
+      ValidationError: {
+        type: 'object',
+        properties: {
+          errors: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'An address is invalid'
+            }
           }
         }
       }

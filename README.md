@@ -122,4 +122,5 @@ npm run start:prod
 We provide two different indexer integrations to get balances, transactions, events:
 - RSKExplorerAPI(Default)
 - BlockscoutAPI
-You should only replace the RSKExplorerAPI class in src/index.ts and set blockscout url in .env
+To use RSKExplorerAPI, you should set profile environment variable into PROFILE=wallet
+To use BlockscoutAPI, you should set profile environment variable into PROFILE=dao

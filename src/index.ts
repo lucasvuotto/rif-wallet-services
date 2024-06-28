@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
 import express from 'express'
 import axios from 'axios'
 import http from 'http'
@@ -14,15 +14,32 @@ import BitcoinCore from './service/bitcoin/BitcoinCore'
 import { ethers } from 'ethers'
 import { AddressService } from './service/address/AddressService'
 import { RSKExplorerAPI } from './rskExplorerApi'
+import { BlockscoutAPI } from './blockscoutApi'
 
 async function main () {
+  const profile = process.env.PROFILE || 'wallet'
+
+  dotenv.config({
+    path: `.env.${profile}`
+  })
+
+  const createInstance = (apiUrl: string, chainId: number, _axios: typeof axios, id: string) => {
+    switch (profile) {
+      case 'wallet':
+        return new RSKExplorerAPI(apiUrl, chainId, _axios, id)
+      case 'dao':
+        return new BlockscoutAPI(apiUrl, chainId, _axios, id)
+      default:
+        throw new Error(`Unknown environment: ${profile}`)
+    }
+  }
+
   const environment = {
     // TODO: remove these defaults
     NETWORKS: [
       {
         ID: '31',
-        API_URL: (process.env.API_URL as string) ||
-        'https://be.explorer.testnet.rootstock.io/api',
+        API_URL: process.env.API_URL as string,
         CHAIN_ID: parseInt(process.env.CHAIN_ID as string) || 31,
         BLOCKBOOK_URL: process.env.BLOCKBOOK_URL,
         NODE_URL: process.env.NODE_URL,
@@ -30,8 +47,7 @@ async function main () {
       },
       {
         ID: '30',
-        API_URL: (process.env.API_MAINNET_URL as string) ||
-        'https://be.explorer.rootstock.io/api',
+        API_URL: (process.env.API_MAINNET_URL as string),
         CHAIN_ID: parseInt(process.env.CHAIN_MAINNET_ID as string) || 30,
         BLOCKBOOK_URL: process.env.BLOCKBOOK_MAINNET_URL,
         NODE_URL: process.env.NODE_MAINNET_URL,
@@ -51,8 +67,7 @@ async function main () {
   const bitcoinMapping: BitcoinDatasource = {}
   const nodeProvider: RSKNodeProvider = {}
   environment.NETWORKS.forEach(network => {
-    dataSourceMapping[network.ID] = new RSKExplorerAPI(network.API_URL, network.CHAIN_ID, axios, network.ID)
-    // dataSourceMapping[network.ID] = new BlockscoutAPI(network.API_URL, network.CHAIN_ID, axios, network.ID)
+    dataSourceMapping[network.ID] = createInstance(network.API_URL, network.CHAIN_ID, axios, network.ID)
     bitcoinMapping[network.ID] = new BitcoinCore({
       BLOCKBOOK_URL: network.BLOCKBOOK_URL,
       CYPHER_ESTIMATE_FEE_URL: network.CYPHER_ESTIMATE_FEE_URL

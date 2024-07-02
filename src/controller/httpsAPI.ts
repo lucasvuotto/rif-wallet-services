@@ -145,6 +145,34 @@ export class HttpsAPI {
       }
     )
 
+    this.app.get('/nfts/:address',
+      async ({ params: { address }, query: { chainId = '31' } } : Request, res: Response,
+        nextFunction: NextFunction) => {
+        try {
+          chainIdSchema.validateSync({ chainId })
+          addressSchema.validateSync({ address })
+          const nft = await this.addressService.getNftInfo({ chainId: chainId as string, address }).catch(nextFunction)
+          return this.responseJsonOk(res)(nft)
+        } catch (e) {
+          this.handleValidationError(e, res)
+        }
+      })
+
+    this.app.get('/address/:address/nfts/:nft',
+      async ({ params: { nft, address }, query: { chainId = '31' } } : Request, res: Response,
+        nextFunction: NextFunction) => {
+        try {
+          chainIdSchema.validateSync({ chainId })
+          addressSchema.validateSync({ address })
+          const nftInfo = await this.addressService
+            .getNftOwnedByAddress({ chainId: chainId as string, address, nftAddress: nft })
+            .catch(nextFunction)
+          return this.responseJsonOk(res)(nftInfo)
+        } catch (e) {
+          this.handleValidationError(e, res)
+        }
+      })
+
     this.app.get(
       '/price',
       async (req: Request<{}, {}, {}, PricesQueryParams>, res: Response) => {

@@ -1,12 +1,14 @@
 import _axios from 'axios'
 import { DataSource } from '../repository/DataSource'
 import {
-  BalanceServerResponse, InternalTransactionResponse, ServerResponse, TokenBalanceServerResponse,
+  BalanceServerResponse, InternalTransactionResponse, NFTInstanceResponse,
+  ServerResponse, ServerResponseV2, TokenBalanceServerResponse,
+  TokenInfoResponse,
   TokenServerResponse, TokenTransferApi, TransactionServerResponse,
   TransactionsServerResponse
 } from './types'
 import {
-  fromApiToInternalTransaction, fromApiToRtbcBalance, fromApiToTEvents,
+  fromApiToInternalTransaction, fromApiToNft, fromApiToNftOwner, fromApiToRtbcBalance, fromApiToTEvents,
   fromApiToTokenWithBalance, fromApiToTokens, fromApiToTransaction
 } from './utils'
 
@@ -83,5 +85,37 @@ export class BlockscoutAPI extends DataSource {
     )
       .then(response => ({ data: response.data.items.map(fromApiToTransaction) }))
       .catch(this.errorHandling)
+  }
+
+  getNft (address: string) {
+    return this.axios?.get<TokenInfoResponse>(`${this.url}/v2/tokens/${address.toLowerCase()}`)
+      .then(response => (fromApiToNft(response.data)))
+      .catch(this.errorHandling)
+  }
+
+  async getNftOwnedByAddress (address: string, nft: string) {
+    const limit = 10
+    let counter = 0
+    let items:NFTInstanceResponse[] = []
+    const url = `${this.url}/v2/tokens/${nft.toLowerCase()}/instances`
+    let response = await this.axios?.get<ServerResponseV2<NFTInstanceResponse>>(url)
+      .then(e => {
+        items = e.data.items
+        return e.data
+      })
+      .catch(() => ({ items: [], next_page_params: null }))
+    if (response && !response.next_page_params) {
+      return fromApiToNftOwner(address, response.items)
+    }
+    while (response && response.next_page_params && counter < limit) {
+      counter++
+      response = await this.axios?.get<ServerResponseV2<NFTInstanceResponse>>(url,
+        { params: response.next_page_params })
+        .then(n => {
+          items = [...items, ...(n.data.items)]
+          return n.data
+        }).catch(() => ({ items: [], next_page_params: null }))
+    }
+    return fromApiToNftOwner(address, [...(response?.items || []), ...items])
   }
 }

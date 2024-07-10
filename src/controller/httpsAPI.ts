@@ -60,10 +60,13 @@ export class HttpsAPI {
         .oneOf(supportedFiat, 'The current currency is not supported')
     })
 
-    const whilelist = ['https://dapp.testnet.dao.rif.technology',
+    const whilelist = [
+      'https://dapp.testnet.dao.rif.technology',
       'https://dapp.mainnet.dao.rif.technology',
       'https://rif-wallet-services.testnet.rifcomputing.net',
-      'https://dao-backend.testnet.rifcomputing.net']
+      'https://dao-backend.testnet.rifcomputing.net',
+      'https://frontend.testnet.dao.rif.technology'
+    ]
     this.app.use(cors({
       origin: (origin, callback) => {
         if (!origin || whilelist.indexOf(origin) !== -1) {

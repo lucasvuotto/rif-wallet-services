@@ -131,4 +131,12 @@ export class RSKExplorerAPI extends DataSource {
         }
       })
   }
+
+  getNft () {
+    throw new Error('Feature not supported')
+  }
+
+  getNftOwnedByAddress () {
+    throw new Error('Feature not supported')
+  }
 }

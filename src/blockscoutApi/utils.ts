@@ -1,6 +1,8 @@
 import {
   IApiToken, ITokenWithBalance, InternalTransaction,
-  Token, TokenTransferApi, TransactionServerResponse
+  NFTInstanceResponse,
+  INftOwner,
+  Token, TokenInfoResponse, TokenTransferApi, TransactionServerResponse
 } from './types'
 import tokens from '@rsksmart/rsk-contract-metadata'
 import { toChecksumAddress } from '@rsksmart/rsk-utils'
@@ -94,6 +96,16 @@ export interface IToken {
   symbol: string;
   contractAddress: string;
   decimals: number;
+}
+
+export interface INft {
+  address: string,
+  holders: number,
+  name: string,
+  symbol: string,
+  type: string,
+  iconUrl: string,
+  totalSupply: number
 }
 
 export const fromApiToTokens = (apiToken:IApiToken, chainId: number): IToken =>
@@ -200,3 +212,29 @@ export const fromApiToRtbcBalance = (balance:string, chainId: number): ITokenWit
     decimals: parseInt('18'),
     balance
   })
+
+export const fromApiToNft = (token: TokenInfoResponse): INft => ({
+  address: token.address,
+  holders: Number(token.holders ?? 0),
+  totalSupply: Number(token.total_supply),
+  name: token.name,
+  symbol: token.symbol,
+  type: token.type,
+  iconUrl: token.icon_url
+})
+
+export const fromApiToNftOwner = (address: string, nfts: NFTInstanceResponse[]): INftOwner[] => (
+  nfts
+    .filter(nft => nft.owner.hash === address)
+    .map(nft => ({
+      owner: nft.owner.hash,
+      token: fromApiToNft(nft.token),
+      animationUrl: nft.animation_url,
+      externalAppUrl: nft.external_app_url,
+      id: nft.id,
+      imageUrl: nft.image_url,
+      isUnique: nft.is_unique,
+      metadata: nft.metadata
+    }))
+
+)

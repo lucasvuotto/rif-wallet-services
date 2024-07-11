@@ -1,4 +1,4 @@
-import { IToken } from './utils'
+import { INft, IToken } from './utils'
 
 export interface Token {
   address: string
@@ -230,4 +230,45 @@ export interface ServerResponse<T> {
   message: string
   status: string
   result: T[]
+}
+
+export interface ServerResponseV2<T> {
+  items: T[]
+  next_page_params: NextPageParams | null
+}
+
+export interface TokenInfoResponse {
+  circulating_market_cap: string,
+  icon_url: string,
+  name: string,
+  decimals: string,
+  symbol: string,
+  address: string,
+  type: string,
+  holders: string,
+  exchange_rate: string,
+  total_supply: string
+}
+
+export interface NFTInstanceResponse {
+  is_unique: boolean,
+  id: string,
+  holder_address_hash: string,
+  image_url: string,
+  animation_url: string,
+  external_app_url: string,
+  metadata: {[key: string]: any},
+  owner: Account,
+  token: TokenInfoResponse
+}
+
+export interface INftOwner {
+  owner: string,
+  token: INft,
+  animationUrl: string,
+  externalAppUrl: string,
+  id: string
+  imageUrl: string
+  isUnique: boolean
+  metadata: {[key: string]: any}
 }

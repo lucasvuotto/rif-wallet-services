@@ -12,7 +12,11 @@ module.exports = {
     },
     {
       url: 'https://rif-wallet-services.testnet.rifcomputing.net',
-      description: 'TestNet'
+      description: 'Wallet TestNet'
+    },
+    {
+      url: 'https://dao-backend.testnet.rifcomputing.net',
+      description: 'DAO TestNet'
     }
   ],
   paths: {
@@ -367,6 +371,139 @@ module.exports = {
                       type: 'string',
                       nullable: true
                     }
+                  }
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Validation Error',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ValidationError'
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/nfts/{address}/': {
+      get: {
+        summary: 'Get NFT information by address and chainId',
+        tags: [
+          'NFT'
+        ],
+        parameters: [
+          {
+            name: 'address',
+            in: 'path',
+            required: true,
+            description: 'NFT address',
+            schema: {
+              type: 'string'
+            },
+            example: '0xa3076bcaCc7112B7fa7c5A87CF32275296d85D64'
+          },
+          {
+            name: 'chainId',
+            in: 'query',
+            description: 'Chain Id identifies the network',
+            required: false,
+            schema: {
+              type: 'string',
+              default: '31'
+            },
+            examples: {
+              'RSK Testnet': {
+                value: '31'
+              },
+              'RSK Mainnet': {
+                value: '30'
+              }
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'successful operation',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/INft'
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Validation Error',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ValidationError'
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/address/{address}/nfts/{nft}': {
+      get: {
+        summary: 'Get NFT instances that belong to an address by chainId',
+        tags: [
+          'NFT'
+        ],
+        parameters: [
+          {
+            name: 'address',
+            in: 'path',
+            required: true,
+            description: 'Account address',
+            schema: {
+              type: 'string'
+            },
+            example: '0xA1B1201B1f6EF7a5D589feD4E2cC4441276156B1'
+          },
+          {
+            name: 'nft',
+            in: 'path',
+            required: true,
+            description: 'NFT address',
+            schema: {
+              type: 'string'
+            },
+            example: '0xa3076bcaCc7112B7fa7c5A87CF32275296d85D64'
+          },
+          {
+            name: 'chainId',
+            in: 'query',
+            description: 'Chain Id identifies the network',
+            required: false,
+            schema: {
+              type: 'string',
+              default: '31'
+            },
+            examples: {
+              'RSK Testnet': {
+                value: '31'
+              },
+              'RSK Mainnet': {
+                value: '30'
+              }
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'successful operation',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/INftOwner'
                   }
                 }
               }
@@ -1329,6 +1466,61 @@ module.exports = {
           properties: {
             price: { type: 'number' },
             lastUpdated: { type: 'string', format: 'date-time' }
+          }
+        }
+      },
+      INft: {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string'
+          },
+          holders: {
+            type: 'number'
+          },
+          name: {
+            type: 'string'
+          },
+          symbol: {
+            type: 'string'
+          },
+          type: {
+            type: 'string'
+          },
+          iconUrl: {
+            type: 'string'
+          },
+          totalSupply: {
+            type: 'number'
+          }
+        }
+      },
+      INftOwner: {
+        type: 'object',
+        properties: {
+          owner: {
+            type: 'string'
+          },
+          token: {
+            $ref: '#/components/schemas/INft'
+          },
+          animationUrl: {
+            type: 'string'
+          },
+          externalAppUrl: {
+            type: 'string'
+          },
+          id: {
+            type: 'string'
+          },
+          imageUrl: {
+            type: 'string'
+          },
+          isUnique: {
+            type: 'boolean'
+          },
+          metadata: {
+            type: 'object'
           }
         }
       },

@@ -24,6 +24,9 @@ export abstract class DataSource {
     prev?: string,
     next?: string,
     blockNumber?: string);
+
+  abstract getNft(address: string);
+  abstract getNftOwnedByAddress(address: string, nft: string);
 }
 
 export type RSKDatasource = {

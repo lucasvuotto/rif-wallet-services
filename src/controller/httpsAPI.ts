@@ -173,6 +173,27 @@ export class HttpsAPI {
         }
       })
 
+    this.app.get('/address/:address/eventsByTopic0',
+      async ({ params: { address }, query: { chainId = '31', topic0, fromBlock, toBlock } } : Request, res: Response,
+        nextFunction: NextFunction) => {
+        try {
+          chainIdSchema.validateSync({ chainId })
+          addressSchema.validateSync({ address })
+          const result = await this.addressService
+            .getEventLogsByAddressAndTopic0({
+              chainId: chainId as string,
+              address: address as string,
+              topic0: topic0 as string,
+              fromBlock: fromBlock as string,
+              toBlock: toBlock as string
+            })
+            .catch(nextFunction)
+          return this.responseJsonOk(res)(result)
+        } catch (e) {
+          this.handleValidationError(e, res)
+        }
+      })
+
     this.app.get(
       '/price',
       async (req: Request<{}, {}, {}, PricesQueryParams>, res: Response) => {

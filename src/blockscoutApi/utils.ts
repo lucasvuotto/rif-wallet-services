@@ -147,7 +147,7 @@ export const fromApiToTransaction = (transaction: TransactionServerResponse): IT
     blockNumber: transaction.block,
     transactionIndex: 0,
     from: transaction.from.hash,
-    to: transaction.to.hash,
+    to: transaction.to?.hash,
     gas: Number(transaction.gas_used),
     gasPrice: transaction.gas_price,
     value: transaction.value,
@@ -167,7 +167,7 @@ export const fromApiToTransaction = (transaction: TransactionServerResponse): IT
       contractAddress: null,
       logs: [],
       from: transaction.from.hash,
-      to: transaction.to.hash,
+      to: transaction.to?.hash,
       status: transaction.status === 'ok' ? '0x1' : '0x0',
       logsBloom: '',
       type: String(transaction.type)

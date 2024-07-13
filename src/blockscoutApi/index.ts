@@ -11,6 +11,7 @@ import {
   fromApiToInternalTransaction, fromApiToNft, fromApiToNftOwner, fromApiToRtbcBalance, fromApiToTEvents,
   fromApiToTokenWithBalance, fromApiToTokens, fromApiToTransaction
 } from './utils'
+import { GetEventLogsByAddressAndTopic0 } from '../service/address/AddressService'
 
 export class BlockscoutAPI extends DataSource {
   private chainId: number
@@ -117,5 +118,31 @@ export class BlockscoutAPI extends DataSource {
         }).catch(() => ({ items: [], next_page_params: null }))
     }
     return fromApiToNftOwner(address, [...(response?.items || []), ...items])
+  }
+
+  async getEventLogsByAddressAndTopic0 ({
+    address, topic0, toBlock = 'latest', fromBlock
+  }: Omit<GetEventLogsByAddressAndTopic0, 'chainId'>) {
+    let fromBlockToUse = fromBlock
+    if (!fromBlock) {
+      const tx = await this.getTransactionsByAddress(address)
+      // @ts-ignore ignored because it's using never as type
+      const lastTx = tx.data.pop() // The last tx is the first transaction
+
+      if (lastTx) fromBlockToUse = lastTx.blockNumber
+    }
+
+    if (!fromBlockToUse) return []
+    const params = {
+      module: 'logs',
+      action: 'getLogs',
+      address: address.toLowerCase(),
+      toBlock,
+      fromBlock: fromBlockToUse,
+      topic0
+    }
+    return this.axios?.get<ServerResponse<TokenTransferApi>>(`${this.url}`, { params })
+      .then(({ data }) => data.result)
+      .catch(() => [])
   }
 }

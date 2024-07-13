@@ -33,6 +33,14 @@ interface GetNftsByAddress extends GetTokensByAddress {
   nftAddress: string
 }
 
+export interface GetEventLogsByAddressAndTopic0 {
+  address: string
+  topic0: string
+  toBlock: string
+  chainId: string
+  fromBlock?: string
+}
+
 type GetBalancesTransactionsPricesByAddress = {
   chainId: string
   address: string
@@ -138,5 +146,10 @@ export class AddressService {
   async getNftOwnedByAddress ({ chainId, address, nftAddress }: GetNftsByAddress) {
     const dataSource = this.dataSourceMapping[chainId]
     return dataSource.getNftOwnedByAddress(address, nftAddress)
+  }
+
+  async getEventLogsByAddressAndTopic0 ({ chainId, ...rest }: GetEventLogsByAddressAndTopic0) {
+    const dataSource = this.dataSourceMapping[chainId]
+    return dataSource.getEventLogsByAddressAndTopic0(rest)
   }
 }
